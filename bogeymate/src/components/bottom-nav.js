@@ -3,6 +3,7 @@ export function renderBottomNav(active) {
   const items = [
     { id: 'home',     icon: '🏠', label: 'Hem' },
     { id: 'newround', icon: '➕', label: 'Ny runda' },
+    { id: 'stats',    icon: '📊', label: 'Statistik' },
     { id: 'settings', icon: '⚙️', label: 'Inställningar' }
   ]
   return `
@@ -20,13 +21,16 @@ export function renderBottomNav(active) {
 export function wireBottomNav() {
   const nav = document.getElementById('bottom-nav')
   if (!nav) return
-  nav.addEventListener('click', e => {
+  // Remove old listener by cloning
+  const fresh = nav.cloneNode(true)
+  nav.parentNode.replaceChild(fresh, nav)
+  fresh.addEventListener('click', e => {
     const btn = e.target.closest('[data-nav]')
     if (!btn) return
     import('../main.js').then(({ navigate, state, showToast }) => {
       const page = btn.dataset.nav
-      if (page==='newround' && state.isGuest) {
-        showToast('Logga inn for att starta en runda','info')
+      if ((page === 'newround' || page === 'stats') && state.isGuest) {
+        showToast('Logga in för att använda den här funktionen', 'info')
         return
       }
       navigate(page)
