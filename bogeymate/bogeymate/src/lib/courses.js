@@ -95,3 +95,38 @@ export async function importOsmHoles(courseId, osmGreens) {
   }
   await markOsmFetched(courseId)
 }
+
+// ─── Hazards (bunkrar och vattenhinder) ───────
+
+export async function getHazards(courseId, holeNumber) {
+  const { data, error } = await supabase
+    .from('course_hazards')
+    .select('*')
+    .eq('course_id', courseId)
+    .eq('hole_number', holeNumber)
+    .order('hazard_type')
+  if (error) throw error
+  return data
+}
+
+export async function addHazard(courseId, holeNumber, hazardType, lat, lon, label, userId) {
+  const { error } = await supabase
+    .from('course_hazards')
+    .insert({
+      course_id:   courseId,
+      hole_number: holeNumber,
+      hazard_type: hazardType,
+      lat, lon,
+      label:       label || null,
+      created_by:  userId
+    })
+  if (error) throw error
+}
+
+export async function deleteHazard(hazardId) {
+  const { error } = await supabase
+    .from('course_hazards')
+    .delete()
+    .eq('id', hazardId)
+  if (error) throw error
+}
