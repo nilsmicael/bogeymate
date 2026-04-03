@@ -506,3 +506,41 @@ body {
 }
 .bn-btn.active { color: var(--green); }
 .bn-btn .bn-icon { font-size: 22px; line-height: 1; }
+
+/* ─── Desktop fixes ──────────────────────────── */
+@media (min-width: 480px) {
+  #root { border-left: 0.5px solid var(--color-border); border-right: 0.5px solid var(--color-border); }
+  .bottom-nav { border-radius: 0; }
+}
+
+/* Ensure bottom nav buttons are always individually clickable */
+.bottom-nav { gap: 0; }
+.bn-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bn-btn span { pointer-events: none; }
+
+/* ─── Humor toast wider ──────────────────────── */
+#bm-toast { white-space: normal !important; max-width: 85vw !important; line-height: 1.4; }
+
+/* ─── Stats bars ─────────────────────────────── */
+.stat-bar-wrap { height: 6px; background: var(--color-bg-secondary); border-radius: 3px; overflow: hidden; }
+.stat-bar-fill { height: 100%; border-radius: 3px; }
+
+/* ─── Comments ───────────────────────────────── */
+.comment-area { margin-bottom: 10px; }
+.comment-bubble {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+.comment-bubble strong { color: var(--green); margin-right: 6px; }
