@@ -2,7 +2,7 @@
 import { getActiveRounds, getFinishedRounds, getProfile } from '../lib/supabase.js'
 import { navigate, state, showToast } from '../main.js'
 import { activityStatus } from '../lib/golf.js'
-import { renderBottomNav } from '../components/bottom-nav.js'
+import { renderBottomNav, wireBottomNav } from '../components/bottom-nav.js'
 
 export async function renderHome(root) {
   root.innerHTML = `
@@ -21,7 +21,7 @@ export async function renderHome(root) {
     ${renderBottomNav('home')}
   `
 
-  root.querySelector('#settings-btn').addEventListener('click', () => navigate('settings'))
+  wireBottomNav(); root.querySelector('#settings-btn').addEventListener('click', () => navigate('settings'))
   root.querySelector('#new-round-btn').addEventListener('click', () => {
     if (state.isGuest) return showToast('Logga in för att starta en runda', 'info')
     navigate('newround')

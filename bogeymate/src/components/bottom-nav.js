@@ -2,26 +2,34 @@
 export function renderBottomNav(active) {
   const items = [
     { id: 'home',     icon: '🏠', label: 'Hem' },
-    { id: 'newround', icon: '+',  label: 'Ny runda' },
-    { id: 'settings', icon: '⚙', label: 'Inställningar' }
+    { id: 'newround', icon: '➕', label: 'Ny runda' },
+    { id: 'settings', icon: '⚙️', label: 'Inställningar' }
   ]
   return `
-    <nav class="bottom-nav">
+    <nav class="bottom-nav" id="bottom-nav">
       ${items.map(item => `
-        <button class="bn-btn ${active === item.id ? 'active' : ''}" data-page="${item.id}">
+        <button class="bn-btn ${active===item.id?'active':''}" data-nav="${item.id}" type="button">
           <span class="bn-icon">${item.icon}</span>
-          ${item.label}
+          <span>${item.label}</span>
         </button>
       `).join('')}
     </nav>
   `
 }
 
-// Wire up bottom nav after rendering
-export function attachBottomNav(root) {
-  root.querySelectorAll('.bn-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      import('../main.js').then(({ navigate }) => navigate(btn.dataset.page))
+export function wireBottomNav() {
+  const nav = document.getElementById('bottom-nav')
+  if (!nav) return
+  nav.addEventListener('click', e => {
+    const btn = e.target.closest('[data-nav]')
+    if (!btn) return
+    import('../main.js').then(({ navigate, state, showToast }) => {
+      const page = btn.dataset.nav
+      if (page==='newround' && state.isGuest) {
+        showToast('Logga inn for att starta en runda','info')
+        return
+      }
+      navigate(page)
     })
   })
 }

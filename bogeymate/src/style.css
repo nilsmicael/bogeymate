@@ -449,3 +449,60 @@ body {
   font-size: 13px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
 }
 .mark-btn:disabled { opacity: .5; cursor: wait; }
+
+/* ─── Login hero redesign ────────────────────── */
+.page-login { padding-bottom: 0; min-height: 100vh; background: transparent; }
+
+.login-hero {
+  background: linear-gradient(160deg, #1D9E75 0%, #0F6E56 60%, #085041 100%);
+  padding: 52px 24px 40px;
+  text-align: center;
+  margin-bottom: 0;
+}
+.login-icon-bg {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.login-big-icon { font-size: 40px; line-height: 1; }
+.app-name    { font-size: 32px; font-weight: 500; color: #fff; margin-bottom: 4px; }
+.app-tagline { font-size: 15px; color: rgba(255,255,255,0.85); font-style: italic; margin-bottom: 2px; }
+.app-sub     { font-size: 12px; color: rgba(255,255,255,0.65); }
+
+/* Push cards up under the hero */
+#login-form, #signup-form, #reset-form, #confirm-notice {
+  padding-top: 0;
+  margin-top: -1px;
+}
+#login-form  .card:first-child,
+#signup-form .card:first-child,
+#reset-form  .card:first-child { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
+
+/* ─── Password show/hide ─────────────────────── */
+.pw-wrap { position: relative; display: flex; }
+.pw-wrap input { flex: 1; padding-right: 44px; }
+.pw-eye {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 44px; background: none; border: none;
+  font-size: 16px; cursor: pointer; color: var(--color-muted);
+  display: flex; align-items: center; justify-content: center;
+}
+.pw-eye:hover { color: var(--color-text); }
+
+/* ─── Bottom nav fix ─────────────────────────── */
+.bottom-nav {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  display: flex; border-top: 0.5px solid var(--color-border);
+  background: var(--color-bg); padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  z-index: 50;
+}
+.bn-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--color-muted);
+  background: none; border: none; cursor: pointer; padding: 6px 4px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.bn-btn.active { color: var(--green); }
+.bn-btn .bn-icon { font-size: 22px; line-height: 1; }
