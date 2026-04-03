@@ -544,3 +544,15 @@ body {
   line-height: 1.5;
 }
 .comment-bubble strong { color: var(--green); margin-right: 6px; }
+
+/* ─── Hazard type buttons ────────────────────── */
+.hazard-type-btn {
+  flex: 1; padding: 10px 8px; border-radius: var(--radius);
+  border: 0.5px solid var(--color-border-md);
+  background: transparent; font-size: 14px; cursor: pointer;
+  color: var(--color-muted);
+}
+.hazard-type-btn.selected {
+  background: var(--green-light); border-color: var(--green);
+  color: var(--green-dark); font-weight: 500;
+}
