@@ -1,7 +1,4 @@
-// ─────────────────────────────────────────────
-//  main.js  — App entry point & simple router
-// ─────────────────────────────────────────────
-
+// main.js — App entry point, router, history stack
 import { getSession, flushQueue, getQueueLength } from './lib/supabase.js'
 import { renderLogin }       from './pages/login.js'
 import { renderHome }        from './pages/home.js'
@@ -12,8 +9,8 @@ import { renderSummary }     from './pages/summary.js'
 import { renderSettings }    from './pages/settings.js'
 import { renderGps }         from './pages/gps.js'
 import { renderCourseSetup } from './pages/course-setup.js'
+import { renderStats }       from './pages/stats.js'
 
-// ─── Global app state ────────────────────────
 export const state = {
   user: null,
   profile: null,
@@ -22,7 +19,6 @@ export const state = {
   isGuest: false
 }
 
-// ─── Router ──────────────────────────────────
 const routes = {
   login:       renderLogin,
   home:        renderHome,
@@ -32,28 +28,52 @@ const routes = {
   summary:     renderSummary,
   settings:    renderSettings,
   gps:         renderGps,
-  coursesetup: renderCourseSetup
+  coursesetup: renderCourseSetup,
+  stats:       renderStats
 }
 
-export function navigate(page, params = {}) {
+// ─── History stack for back navigation ───────
+const _history = []
+
+export function navigate(page, params = {}, addToHistory = true) {
   Object.assign(state, params)
   const root = document.getElementById('root')
   root.innerHTML = ''
   const renderer = routes[page]
-  if (renderer) renderer(root)
-  // Save current page for back-navigation
+  if (!renderer) return
+  if (addToHistory && window._currentPage && window._currentPage !== page) {
+    _history.push(window._currentPage)
+  }
   window._currentPage = page
+  // Push browser history entry so back button works
+  window.history.pushState({ page }, '', '/' + (page === 'home' ? '' : page))
+  renderer(root)
 }
 
-// ─── Offline sync ────────────────────────────
-window.addEventListener('online', async () => {
-  const flushed = await flushQueue()
-  if (flushed > 0) {
-    showToast(`✓ ${flushed} slag synkroniserade`, 'success')
+export function navigateBack() {
+  const prev = _history.pop()
+  if (prev) navigate(prev, {}, false)
+  else navigate('home', {}, false)
+}
+
+// ─── Browser back button (mobile + desktop) ──
+window.addEventListener('popstate', (e) => {
+  e.preventDefault()
+  const prev = _history.pop()
+  if (prev) {
+    window._currentPage = prev
+    const root = document.getElementById('root')
+    root.innerHTML = ''
+    const renderer = routes[prev]
+    if (renderer) renderer(root)
+  } else {
+    // At root — push a new state so next back press is catchable
+    window.history.pushState({ page: 'home' }, '', '/')
+    navigate('home', {}, false)
   }
 })
 
-// ─── Toast notifications ─────────────────────
+// ─── Toast ────────────────────────────────────
 export function showToast(message, type = 'info') {
   const existing = document.getElementById('bm-toast')
   if (existing) existing.remove()
@@ -63,21 +83,70 @@ export function showToast(message, type = 'info') {
     success: { bg: '#E1F5EE', border: '#5DCAA5', color: '#0F6E56' },
     error:   { bg: '#FCEBEB', border: '#F09595', color: '#A32D2D' },
     info:    { bg: '#E6F1FB', border: '#85B7EB', color: '#185FA5' },
-    offline: { bg: '#FAEEDA', border: '#FAC775', color: '#854F0B' }
+    offline: { bg: '#FAEEDA', border: '#FAC775', color: '#854F0B' },
+    funny:   { bg: '#FAEEDA', border: '#FAC775', color: '#854F0B' }
   }
   const c = colors[type] || colors.info
   toast.style.cssText = `
-    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-    background: ${c.bg}; border: 0.5px solid ${c.border}; color: ${c.color};
-    padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 500;
-    z-index: 9999; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);
+    background:${c.bg};border:0.5px solid ${c.border};color:${c.color};
+    padding:10px 18px;border-radius:999px;font-size:13px;font-weight:500;
+    z-index:9999;white-space:nowrap;max-width:90vw;text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
   `
   toast.textContent = message
   document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), 3000)
+  setTimeout(() => toast?.remove(), 4000)
 }
 
-// ─── Offline indicator ───────────────────────
+// ─── Humor messages ───────────────────────────
+export const HUMOR = {
+  tripleOrWorse: [
+    "🤦 Trippelbogey! Det finns andra sätt att spendera sin tid…",
+    "😬 Vad hände där? Bollen hittade varje bunker på hålet.",
+    "🌳 Skogen kallar — och den svarade uppenbarligen.",
+    "⛳ Statistiken tackar dig varmt för bidraget.",
+    "🙈 Vi säger inget. Vi tänker det bara.",
+    "💀 Hålet vann. Klart och tydligt.",
+    "🎻 Någon spelar fiol i bakgrunden…"
+  ],
+  bogey: [
+    "😤 Bogey. Kunde ha gått värre. (Men ändå.)",
+    "🙄 En bogey till i samlingen.",
+  ],
+  par: [
+    "👏 Par! Inte glamoröst, men hederligt.",
+    "✅ Par. Exakt vad banan förväntade sig.",
+  ],
+  birdie: [
+    "🐦 BIRDIE! Någon vet faktiskt vad de håller på med!",
+    "🔥 Birdie! Resten av sällskapet noterar med avundsjuka.",
+    "⭐ Birdie! Spara skärmdumpen — det händer inte varje dag.",
+  ],
+  eagle: [
+    "🦅 EAGLE!!! Är du säker på att du räknade rätt?",
+    "🎉 EAGLE! Hela banan hörde jublet (eller borde ha gjort det).",
+    "🏆 Eagle! Direkt in i legendernas hall.",
+  ],
+  holeInOne: [
+    "🚨🚨🚨 HOLE IN ONE!!! RING ALLA DU KÄNNER. NU. GENAST.",
+    "😱 HÅL I ETT! Statistiskt sett borde detta inte ha hänt.",
+    "🍾 HOLE IN ONE! Traditionsenligt bjuder du på en runda i baren.",
+  ]
+}
+
+export function humorMessage(vsParBrutto) {
+  const msgs = vsParBrutto >= 3 ? HUMOR.tripleOrWorse
+    : vsParBrutto === 2 ? HUMOR.bogey
+    : vsParBrutto === 1 ? HUMOR.bogey
+    : vsParBrutto === 0 ? HUMOR.par
+    : vsParBrutto === -1 ? HUMOR.birdie
+    : vsParBrutto === -2 ? HUMOR.eagle
+    : HUMOR.holeInOne
+  return msgs[Math.floor(Math.random() * msgs.length)]
+}
+
+// ─── Offline indicator ────────────────────────
 function updateOfflineBar() {
   const queued = getQueueLength()
   let bar = document.getElementById('offline-status-bar')
@@ -85,29 +154,31 @@ function updateOfflineBar() {
     if (!bar) {
       bar = document.createElement('div')
       bar.id = 'offline-status-bar'
-      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#FCEBEB;border-top:0.5px solid #F09595;color:#A32D2D;font-size:12px;padding:8px 16px;text-align:center;z-index:999;'
+      bar.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#FCEBEB;border-top:0.5px solid #F09595;color:#A32D2D;font-size:12px;padding:8px 16px;text-align:center;z-index:999;'
       document.body.appendChild(bar)
     }
-    bar.textContent = queued > 0
-      ? `Offline – ${queued} slag väntar på uppladdning`
-      : 'Offline – slag sparas lokalt'
-  } else if (bar) {
-    bar.remove()
-  }
+    bar.textContent = queued > 0 ? `Offline – ${queued} slag väntar på uppladdning` : 'Offline – slag sparas lokalt'
+  } else if (bar) { bar.remove() }
 }
 setInterval(updateOfflineBar, 5000)
 window.addEventListener('online',  updateOfflineBar)
 window.addEventListener('offline', updateOfflineBar)
+window.addEventListener('online', async () => {
+  const flushed = await flushQueue()
+  if (flushed > 0) showToast(`✓ ${flushed} slag synkroniserade`, 'success')
+})
 
 // ─── Boot ─────────────────────────────────────
 async function boot() {
-  const session = await getSession()
-  if (session) {
-    state.user = session.user
-    navigate('home')
-  } else {
+  // Handle Supabase auth redirect (email confirm, password reset)
+  const hash = window.location.hash
+  if (hash.includes('error=access_denied')) {
     navigate('login')
+    showToast('Bekräftelselänken har gått ut — begär en ny', 'error')
+    return
   }
+  const session = await getSession()
+  if (session) { state.user = session.user; navigate('home') }
+  else navigate('login')
 }
-
 boot()
