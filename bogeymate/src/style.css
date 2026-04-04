@@ -544,3 +544,67 @@ body {
   line-height: 1.5;
 }
 .comment-bubble strong { color: var(--green); margin-right: 6px; }
+
+/* ─── Hazard type buttons ────────────────────── */
+.hazard-type-btn {
+  flex: 1; padding: 10px 8px; border-radius: var(--radius);
+  border: 0.5px solid var(--color-border-md);
+  background: transparent; font-size: 14px; cursor: pointer;
+  color: var(--color-muted);
+}
+.hazard-type-btn.selected {
+  background: var(--green-light); border-color: var(--green);
+  color: var(--green-dark); font-weight: 500;
+}
+
+/* ─── Course quick-pick chips ────────────────── */
+.course-chip {
+  padding: 7px 14px; border-radius: 999px; font-size: 13px;
+  border: 0.5px solid var(--color-border-md);
+  background: transparent; color: var(--color-text); cursor: pointer;
+}
+.course-chip:hover { background: var(--color-bg-secondary); }
+.home-chip {
+  background: var(--green-light); border-color: var(--green);
+  color: var(--green-dark); font-weight: 500;
+}
+
+/* ─── Favorite course buttons ────────────────── */
+.fav-course-btn {
+  display: block; width: 100%; padding: 11px 14px; text-align: left;
+  border-radius: var(--radius); border: 0.5px solid var(--color-border-md);
+  background: transparent; font-size: 14px; cursor: pointer;
+  color: var(--color-text);
+}
+.fav-course-btn.selected {
+  background: var(--green-light); border-color: var(--green);
+  color: var(--green-dark); font-weight: 500;
+}
+
+/* ─── Tee color buttons ──────────────────────── */
+.tee-color-btn {
+  padding: 7px 12px; border-radius: 999px; border: 2px solid transparent;
+  font-size: 13px; cursor: pointer; font-weight: 500;
+}
+.tee-color-btn.selected { border-color: var(--green) !important; }
+
+/* ─── Help tips ──────────────────────────────── */
+.help-tip-card {
+  display: flex; gap: 14px; padding: 14px 0;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.help-tip-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+.help-tip-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.help-tip-body  { font-size: 13px; color: var(--color-muted); line-height: 1.6; }
+
+/* ─── FAQ accordion ──────────────────────────── */
+.faq-row {
+  padding: 13px 16px; border-bottom: 0.5px solid var(--color-border);
+  cursor: pointer;
+}
+.faq-row:last-child { border-bottom: none; }
+.faq-q { font-size: 14px; font-weight: 500; display: flex; justify-content: space-between; }
+.faq-arrow { transition: transform .2s; display: inline-block; }
+.faq-row.open .faq-arrow { transform: rotate(90deg); }
+.faq-a { font-size: 13px; color: var(--color-muted); line-height: 1.6; max-height: 0; overflow: hidden; transition: max-height .25s; }
+.faq-row.open .faq-a { max-height: 200px; margin-top: 8px; }
