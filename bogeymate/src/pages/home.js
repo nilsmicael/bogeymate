@@ -34,19 +34,8 @@ export async function renderHome(root) {
     } catch {}
   }
 
-  // Show notification banner if profile wants it
-  if (state.profile?.notify_new_round) {
-    root.querySelector('#notif-area').innerHTML = `
-      <div class="notif-banner">
-        🔔 <span><strong>Erik Lindgren</strong> startade en runda på Delsjö GK ·
-        <span class="link-inline" id="follow-notif">Följ →</span></span>
-        <button class="notif-close" id="close-notif">✕</button>
-      </div>
-    `
-    root.querySelector('#close-notif')?.addEventListener('click', e => {
-      e.target.closest('.notif-banner').remove()
-    })
-  }
+  // Notification area — real notifications come from Supabase realtime
+  // (no hardcoded demo data)
 
   // Active rounds
   try {
