@@ -322,3 +322,57 @@ export async function searchProfiles(query) {
   if (error) throw error
   return data
 }
+export async function getCourseTees(courseId) {
+  const { data, error } = await supabase
+    .from('course_tees')
+    .select('*')
+    .eq('course_id', courseId)
+    .order('slope', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function upsertCourseTee(courseId, teeData) {
+  const { data, error } = await supabase
+    .from('course_tees')
+    .upsert({ course_id: courseId, ...teeData }, { onConflict: 'course_id,tee_color' })
+    .select().single()
+  if (error) throw error
+  return data
+}
+
+export async function getRecentCourses(userId, limit = 5) {
+  const { data, error } = await supabase
+    .from('rounds')
+    .select('course_id, course_name')
+    .not('course_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(limit * 3)
+  if (error) return []
+  const seen = new Set()
+  return (data || []).filter(r => {
+    if (!r.course_id || seen.has(r.course_id)) return false
+    seen.add(r.course_id); return true
+  }).slice(0, limit)
+}
+
+export async function getFavoriteCoursesForUser(userId) {
+  const { data, error } = await supabase
+    .from('rounds')
+    .select('course_id, course_name')
+    .not('course_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  if (error) return []
+  const counts = {}
+  const names  = {}
+  for (const r of data || []) {
+    if (!r.course_id) continue
+    counts[r.course_id] = (counts[r.course_id] || 0) + 1
+    names[r.course_id]  = r.course_name
+  }
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id, count]) => ({ id, name: names[id], count }))
+}
