@@ -10,6 +10,9 @@ import { renderSettings }    from './pages/settings.js'
 import { renderGps }         from './pages/gps.js'
 import { renderCourseSetup } from './pages/course-setup.js'
 import { renderStats }       from './pages/stats.js'
+import { renderFollowBall }  from './pages/follow-ball.js'
+import { renderHelp }        from './pages/help.js'
+import { checkFirstRun }     from './pages/help.js'
 
 export const state = {
   user: null,
@@ -29,7 +32,9 @@ const routes = {
   settings:    renderSettings,
   gps:         renderGps,
   coursesetup: renderCourseSetup,
-  stats:       renderStats
+  stats:       renderStats,
+  followball:  renderFollowBall,
+  help:        renderHelp
 }
 
 // ─── History stack for back navigation ───────
@@ -178,7 +183,47 @@ async function boot() {
     return
   }
   const session = await getSession()
-  if (session) { state.user = session.user; navigate('home') }
+  if (session) { state.user = session.user; navigate('home'); setTimeout(() => checkFirstRun(document.getElementById('root')), 800) }
   else navigate('login')
 }
 boot()
+
+// ─── First login tip dialog ───────────────────
+export function showFirstLoginTip() {
+  const key = 'bm_tip_shown'
+  if (localStorage.getItem(key)) return
+  localStorage.setItem(key, '1')
+
+  const overlay = document.createElement('div')
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:flex-end;justify-content:center;'
+  overlay.innerHTML = `
+    <div style="background:var(--color-bg,#fff);border-radius:16px 16px 0 0;padding:24px 20px 32px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;">
+      <div style="font-size:28px;text-align:center;margin-bottom:12px;">💡</div>
+      <div style="font-size:18px;font-weight:500;text-align:center;margin-bottom:16px;">Tips för bästa upplevelse</div>
+
+      <div style="font-size:14px;line-height:1.7;color:#444;">
+        <p style="margin-bottom:12px;"><strong>📱 Håll appen aktiv i bakgrunden</strong><br>
+        Annars kan appen pausa och du missar live-uppdateringar.</p>
+
+        <p style="font-weight:500;margin-bottom:4px;">iPhone:</p>
+        <p style="margin-bottom:12px;">Gå till <em>Inställningar → Skärmtid → Alltid tillåtet</em> och lägg till Safari. Alternativt: håll skärmen aktiv under rundan.</p>
+
+        <p style="font-weight:500;margin-bottom:4px;">Android:</p>
+        <p style="margin-bottom:12px;">Gå till <em>Inställningar → Appar → Chrome → Batteri</em> och välj <em>"Ingen begränsning"</em>. Aktivera även <em>"Håll skärmen aktiv"</em> i BogeyMate under Inställningar.</p>
+
+        <p style="margin-bottom:12px;"><strong>🏠 Lägg till på hemskärmen</strong><br>
+        Öppna BogeyMate i Safari (iPhone) eller Chrome (Android), tryck dela-knappen och välj "Lägg till på hemskärmen".</p>
+
+        <p><strong>📡 Offline-läge</strong><br>
+        Inga problem om du tappar signal — slag sparas lokalt och laddas upp automatiskt.</p>
+      </div>
+
+      <button id="tip-close" style="width:100%;padding:13px;margin-top:20px;border:none;border-radius:12px;background:#1D9E75;color:#fff;font-size:15px;font-weight:500;cursor:pointer;">
+        Förstått — dags att spela! ⛳
+      </button>
+    </div>
+  `
+  document.body.appendChild(overlay)
+  overlay.querySelector('#tip-close').addEventListener('click', () => overlay.remove())
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove() })
+}
