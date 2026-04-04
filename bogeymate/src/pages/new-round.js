@@ -1,7 +1,8 @@
 // pages/new-round.js
-import { createRound, addPlayerToRound, createInvite, getProfile } from '../lib/supabase.js'
+import { createRound, addPlayerToRound, createInvite, getProfile, searchProfiles } from '../lib/supabase.js'
 import { navigate, state, showToast } from '../main.js'
 import { FORMAT_DESCRIPTIONS } from '../lib/golf.js'
+import { renderBottomNav, wireBottomNav } from '../components/bottom-nav.js'
 
 export function renderNewRound(root) {
   root.innerHTML = `
@@ -106,6 +107,7 @@ export function renderNewRound(root) {
       </div>
 
       <button class="btn-primary" id="start-btn">Starta runda</button>
+    `+ renderBottomNav('newround') +`
     </div>
   `
 
@@ -115,6 +117,7 @@ export function renderNewRound(root) {
 
   // Back
   root.querySelector('#back').addEventListener('click', () => navigate('home'))
+  wireBottomNav()
 
   // Holes info
   root.querySelector('#holes').addEventListener('change', function() {
@@ -215,6 +218,45 @@ export function renderNewRound(root) {
   })
 
   // Start round
+  // Real user search
+  const invitedUsers = []
+  root.querySelector('#user-search-btn')?.addEventListener('click', async () => {
+    const q = root.querySelector('#user-search')?.value?.trim()
+    if (!q || q.length < 2) return showToast('Skriv minst 2 tecken', 'info')
+    const resultsEl = root.querySelector('#user-search-results')
+    resultsEl.innerHTML = '<div style="font-size:13px;color:var(--color-muted);padding:8px 0;">Söker…</div>'
+    try {
+      const users = await searchProfiles(q)
+      if (!users.length) {
+        resultsEl.innerHTML = '<div style="font-size:13px;color:var(--color-muted);padding:8px 0;">Ingen hittades — kontrollera att de har ett konto.</div>'
+        return
+      }
+      resultsEl.innerHTML = '<div class="card card-list" style="margin:8px 0 0;">' +
+        users.map(u => `
+          <div class="list-row" style="cursor:default;">
+            <div class="avatar av-green">${u.full_name?.split(' ').map(w=>w[0]).join('').slice(0,2)||'?'}</div>
+            <div style="flex:1;"><div class="row-title">${u.full_name}</div><div class="row-sub">HCP ${u.handicap||'–'}</div></div>
+            <button class="invite-add-btn" data-uid="${u.id}" data-name="${u.full_name}">+ Lägg till</button>
+          </div>
+        `).join('') + '</div>'
+      resultsEl.querySelectorAll('.invite-add-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const uid = this.dataset.uid
+          const name = this.dataset.name
+          if (!invitedUsers.find(u => u.id === uid)) {
+            invitedUsers.push({ id: uid, name })
+            this.textContent = 'Tillagd'
+            this.classList.add('added')
+            showToast(name + ' tillagd i rundan', 'success')
+          }
+        })
+      })
+    } catch(e) { resultsEl.innerHTML = '<div style="font-size:13px;color:#A32D2D;padding:8px 0;">Sökning misslyckades.</div>' }
+  })
+  root.querySelector('#user-search')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') root.querySelector('#user-search-btn')?.click()
+  })
+
   root.querySelector('#start-btn').addEventListener('click', async () => {
     const course = root.querySelector('#course').value.trim()
     const holes  = root.querySelector('#holes').value
