@@ -1,6 +1,6 @@
 // pages/home.js
 import { getActiveRounds, getFinishedRounds, getProfile } from '../lib/supabase.js'
-import { navigate, state, showToast } from '../main.js'
+import { navigate, state, showToast, showFirstLoginTip } from '../main.js'
 import { activityStatus } from '../lib/golf.js'
 import { renderBottomNav, wireBottomNav } from '../components/bottom-nav.js'
 
@@ -31,6 +31,7 @@ export async function renderHome(root) {
   if (state.user && !state.profile) {
     try {
       state.profile = await getProfile(state.user.id)
+      setTimeout(showFirstLoginTip, 1000)
     } catch {}
   }
 
