@@ -311,3 +311,14 @@ export async function flushQueue() {
 export function getQueueLength() {
   return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]').length
 }
+
+export async function searchProfiles(query) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, handicap')
+    .or(`full_name.ilike.%${query}%`)
+    .eq('public_profile', true)
+    .limit(8)
+  if (error) throw error
+  return data
+}
